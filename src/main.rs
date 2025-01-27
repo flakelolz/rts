@@ -1,11 +1,10 @@
-mod grid;
 mod inspector;
 mod warrior;
 
 pub mod prelude {
-    pub use crate::grid::GridPlugin;
-    pub use crate::inspector::InspectorPlugin;
-    pub use crate::warrior::WarriorPlugin;
+    pub use crate::MainCamera;
+    pub use crate::inspector::*;
+    pub use crate::warrior::*;
     pub use bevy::prelude::*;
     pub use bevy::window::PrimaryWindow;
     pub use bevy_inspector_egui::prelude::*;
@@ -33,11 +32,14 @@ fn main() {
             .set(ImagePlugin::default_nearest()),
     );
     app.add_plugins(InspectorPlugin);
-    app.add_plugins((GridPlugin, WarriorPlugin));
+    app.add_plugins((WarriorPlugin));
     app.add_systems(Startup, setup);
     app.run();
 }
 
+#[derive(Component)]
+pub struct MainCamera;
+
 fn setup(mut commands: Commands) {
-    commands.spawn(Camera2d);
+    commands.spawn((Camera2d, MainCamera));
 }

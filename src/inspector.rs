@@ -21,7 +21,7 @@ fn world_inspector_ui(world: &mut World) {
 
     egui::Window::new("World Inspector")
         .default_pos((0., 0.))
-        .default_size((320., 160.))
+        .default_size((320., 360.))
         .default_open(false)
         .show(egui_context.get_mut(), |ui| {
             egui::ScrollArea::both().show(ui, |ui| {

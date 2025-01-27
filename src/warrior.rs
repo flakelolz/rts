@@ -7,11 +7,28 @@ pub struct WarriorPlugin;
 impl Plugin for WarriorPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_warrior)
-            .add_systems(Update, execute_animations);
+            .register_type::<AnimationConfig>()
+            .add_systems(Update, execute_animations)
+            .init_resource::<MousePosition>()
+            .register_type::<MousePosition>()
+            .register_type::<Position>()
+            .add_systems(Update, my_cursor_system)
+            .add_systems(Update, movement);
     }
 }
 
 #[derive(Component)]
+struct Warrior;
+
+#[derive(Component, Default, Reflect, InspectorOptions)]
+#[reflect(Component, InspectorOptions)]
+struct Position {
+    current: Vec2,
+    desired: Vec2,
+}
+
+#[derive(Component, Default, Reflect, InspectorOptions)]
+#[reflect(Component, InspectorOptions)]
 struct AnimationConfig {
     first: usize,
     last: usize,
@@ -47,7 +64,9 @@ fn spawn_warrior(
     let anim_config = AnimationConfig::new(0, 5, 10, true);
 
     commands.spawn((
+        Warrior,
         Name::new("Warrior"),
+        Position::default(),
         Sprite {
             image: texture.clone(),
             texture_atlas: Some(TextureAtlas {
@@ -82,5 +101,56 @@ fn execute_animations(time: Res<Time>, mut query: Query<(&mut AnimationConfig, &
                 }
             }
         }
+    }
+}
+
+fn movement(
+    mut warrior_q: Query<(&mut Transform, &mut Position), With<Warrior>>,
+    mouse_pos: Res<MousePosition>,
+    click: Res<ButtonInput<MouseButton>>,
+) {
+    for (mut transform, mut position) in &mut warrior_q {
+        transform.translation.x = position.current.x;
+        transform.translation.y = position.current.y;
+
+        if click.just_pressed(MouseButton::Right) {
+            position.desired.x = mouse_pos.x;
+            position.desired.y = mouse_pos.y;
+        }
+
+        if position.current != position.desired {
+            let current = position.current;
+            let desired = position.desired;
+            let x = (desired.x - current.x).signum() * 10.;
+            let y = (desired.y - current.y).signum() * 10.;
+            // let calculation = (desired - current) * 0.05;
+            // position.current += calculation;
+            position.current.x += x;
+            position.current.y += y;
+        }
+    }
+}
+
+#[derive(Resource, Default, Reflect, InspectorOptions)]
+#[reflect(Resource, InspectorOptions)]
+pub struct MousePosition {
+    x: f32,
+    y: f32,
+}
+
+fn my_cursor_system(
+    windows: Query<&Window>,
+    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    mut mouse_pos: ResMut<MousePosition>,
+) {
+    let window = windows.single();
+    let (camera, camera_transform) = camera_q.single();
+
+    if let Some(world_position) = window
+        .cursor_position()
+        .map(|cursor| camera.viewport_to_world_2d(camera_transform, cursor))
+    {
+        mouse_pos.x = world_position.unwrap().x;
+        mouse_pos.y = world_position.unwrap().y;
     }
 }
