@@ -13,6 +13,7 @@ pub mod prelude {
         bevy_egui::{EguiContext, EguiPlugin},
         bevy_inspector, egui,
     };
+    pub use std::time::Duration;
 }
 
 use crate::prelude::*;
@@ -32,7 +33,7 @@ fn main() {
             .set(ImagePlugin::default_nearest()),
     );
     app.add_plugins(InspectorPlugin);
-    app.add_plugins((WarriorPlugin));
+    app.add_plugins(WarriorPlugin);
     app.add_systems(Startup, setup);
     app.run();
 }

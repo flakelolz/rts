@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use crate::prelude::*;
 
 pub struct WarriorPlugin;
@@ -121,12 +119,12 @@ fn movement(
         if position.current != position.desired {
             let current = position.current;
             let desired = position.desired;
-            let x = (desired.x - current.x).signum() * 10.;
-            let y = (desired.y - current.y).signum() * 10.;
-            // let calculation = (desired - current) * 0.05;
-            // position.current += calculation;
-            position.current.x += x;
-            position.current.y += y;
+            let speed = Vec2::splat(2.);
+            let calc = (desired - current).normalize() * speed;
+
+            if desired.distance(current) > 10. {
+                position.current += calc;
+            }
         }
     }
 }
