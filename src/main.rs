@@ -1,9 +1,13 @@
+mod animations;
 mod inspector;
+mod mouse;
 mod warrior;
 
 pub mod prelude {
     pub use crate::MainCamera;
+    pub use crate::animations::*;
     pub use crate::inspector::*;
+    pub use crate::mouse::*;
     pub use crate::warrior::*;
     pub use bevy::prelude::*;
     pub use bevy::window::PrimaryWindow;
@@ -33,7 +37,7 @@ fn main() {
             .set(ImagePlugin::default_nearest()),
     );
     app.add_plugins(InspectorPlugin);
-    app.add_plugins(WarriorPlugin);
+    app.add_plugins((MousePlugin, AnimationsPlugin, WarriorPlugin));
     app.add_systems(Startup, setup);
     app.run();
 }
