@@ -25,7 +25,7 @@ fn spawn_warrior(
         Warrior,
         Name::new("Warrior"),
         UnitPosition::default(),
-        UnitSpeed(2.),
+        UnitSpeed(250.),
         Sprite {
             image: texture.clone(),
             texture_atlas: Some(TextureAtlas {
