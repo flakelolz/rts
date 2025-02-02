@@ -10,11 +10,29 @@ impl Plugin for MousePlugin {
     }
 }
 
-#[derive(Resource, Default, Reflect, InspectorOptions)]
+#[derive(Resource, Default, Clone, Copy, Reflect, InspectorOptions)]
 #[reflect(Resource, InspectorOptions)]
 pub struct MousePosition {
     pub x: f32,
     pub y: f32,
+}
+
+impl From<MousePosition> for Vec2 {
+    fn from(value: MousePosition) -> Self {
+        Self {
+            x: value.x,
+            y: value.y,
+        }
+    }
+}
+
+impl From<Vec2> for MousePosition {
+    fn from(value: Vec2) -> Self {
+        Self {
+            x: value.x,
+            y: value.y,
+        }
+    }
 }
 
 fn mouse_position(

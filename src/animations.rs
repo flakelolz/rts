@@ -5,7 +5,8 @@ pub struct AnimationsPlugin;
 impl Plugin for AnimationsPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<AnimationConfig>()
-            .add_systems(Update, execute_animations);
+            // .add_systems(Update, execute_animations)
+        ;
     }
 }
 
@@ -59,3 +60,4 @@ fn execute_animations(mut query: Query<(&mut AnimationConfig, &mut Sprite)>, tim
         }
     }
 }
+
