@@ -7,3 +7,7 @@ edition = "2024"
 bevy = { version = "0.15.1", features = ["dynamic_linking"] }
 bevy-inspector-egui = { version = "0.29.1", features = ["highlight_changes"] }
 bevy_aseprite_ultra = "0.4.1"
+
+[lints.clippy]
+too_many_arguments = "allow"
+type_complexity = "allow"
