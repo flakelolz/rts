@@ -5,8 +5,8 @@ pub struct AnimationsPlugin;
 impl Plugin for AnimationsPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<AnimationConfig>()
-            // .add_systems(Update, execute_animations)
-        ;
+            .add_systems(Update, orientation)
+            .add_systems(Update, animation);
     }
 }
 
@@ -36,28 +36,20 @@ impl AnimationConfig {
     }
 }
 
-// This system loops through all the sprites in the `TextureAtlas`, from  `first_sprite_index` to
-// `last_sprite_index` (both defined in `AnimationConfig`).
-fn execute_animations(mut query: Query<(&mut AnimationConfig, &mut Sprite)>, time: Res<Time>) {
-    for (mut config, mut sprite) in &mut query {
-        // We track how long the current sprite has been displayed for
-        config.frame_timer.tick(time.delta());
+fn animation(mut unit_q: Query<(&mut AseSpriteAnimation, &UnitState), With<Unit>>) {
+    for (mut anim, state) in &mut unit_q {
+        anim.animation.tag = Some(state.into());
+    }
+}
 
-        // If it has been displayed for the user-defined amount of time (fps)...
-        if config.frame_timer.just_finished() {
-            if let Some(atlas) = &mut sprite.texture_atlas {
-                if atlas.index == config.last {
-                    atlas.index = config.first;
-                } else {
-                    atlas.index += 1;
-                    config.frame_timer = AnimationConfig::timer_from_fps(config.fps);
-                }
-
-                if config.looping {
-                    config.frame_timer = AnimationConfig::timer_from_fps(config.fps);
-                }
+fn orientation(mut unit_q: Query<(&mut Sprite, &UnitPosition)>) {
+    for (mut sprite, position) in &mut unit_q {
+        if let Some(desired) = position.desired {
+            if desired.x < position.current.x {
+                sprite.flip_x = true;
+            } else if desired.x > position.current.x {
+                sprite.flip_x = false;
             }
         }
     }
 }
-

@@ -16,10 +16,29 @@ impl Plugin for UnitsPlugin {
     }
 }
 
+#[derive(Component, Default, Reflect, InspectorOptions)]
+#[reflect(Component, InspectorOptions)]
 pub enum UnitState {
+    #[default]
     Idle,
     Run,
     Action,
+}
+
+impl std::fmt::Display for UnitState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            UnitState::Idle => write!(f, "Idle"),
+            UnitState::Run => write!(f, "Run"),
+            UnitState::Action => write!(f, "Action"),
+        }
+    }
+}
+
+impl From<&UnitState> for String {
+    fn from(value: &UnitState) -> Self {
+        format!("{value}")
+    }
 }
 
 #[derive(Component, Default, Reflect, InspectorOptions)]
@@ -31,6 +50,15 @@ pub struct Unit;
 pub struct UnitPosition {
     pub current: Vec2,
     pub desired: Option<Vec2>,
+}
+
+impl UnitPosition {
+    pub fn new(current: Vec2) -> Self {
+        Self {
+            current,
+            desired: None,
+        }
+    }
 }
 
 #[derive(Component, Default, Deref, DerefMut, Reflect, InspectorOptions)]
@@ -45,25 +73,26 @@ fn update_unit_transform(mut query: Query<(&mut Transform, &mut UnitPosition), W
 }
 
 fn assign_unit_movement(
-    mut warrior_q: Query<&mut UnitPosition, With<Unit>>,
+    mut unit_q: Query<(&mut UnitPosition, &mut UnitState), With<Unit>>,
     selected: ResMut<Selected>,
     mouse_pos: Res<MousePosition>,
     input: Res<ButtonInput<MouseButton>>,
 ) {
-    let mut iter = warrior_q.iter_many_mut(&**selected);
+    let mut iter = unit_q.iter_many_mut(&**selected);
 
-    while let Some(mut position) = iter.fetch_next() {
+    while let Some((mut position, mut state)) = iter.fetch_next() {
         if input.just_pressed(MouseButton::Right) {
             position.desired = Some(Vec2::from(*mouse_pos));
+            *state = UnitState::Run;
         }
     }
 }
 
 fn update_unit_movement(
-    mut warrior_q: Query<(&mut UnitPosition, &UnitSpeed), With<Unit>>,
+    mut unit_q: Query<(&mut UnitPosition, &UnitSpeed, &mut UnitState), With<Unit>>,
     time: Res<Time>,
 ) {
-    for (mut position, speed) in &mut warrior_q {
+    for (mut position, speed, mut state) in &mut unit_q {
         let speed = **speed * time.delta_secs();
 
         if let Some(desired) = position.desired {
@@ -77,6 +106,7 @@ fn update_unit_movement(
                 }
             } else {
                 position.desired = None;
+                *state = UnitState::Idle;
             }
         }
     }

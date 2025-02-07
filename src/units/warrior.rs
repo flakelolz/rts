@@ -1,56 +1,37 @@
+use bevy::input::common_conditions::input_just_pressed;
+
 use crate::prelude::*;
 
 pub struct WarriorPlugin;
 
 impl Plugin for WarriorPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_warrior)
-            .add_systems(Update, warr_animation);
+        app.add_systems(
+            Update,
+            spawn_warrior.run_if(input_just_pressed(KeyCode::Space)),
+        );
     }
 }
 
 #[derive(Component)]
 pub struct Warrior;
 
-#[derive(Component, Default, Reflect, InspectorOptions)]
-#[reflect(Component, InspectorOptions)]
-pub enum WarrStates {
-    #[default]
-    Idle,
-    Run,
-    Attack,
-}
-
 fn spawn_warrior(mut commands: Commands, assets: Res<AssetServer>) {
+    let position = Vec2 {
+        x: fastrand::i32(-200..200) as f32,
+        y: fastrand::i32(-200..200) as f32,
+    };
+
     commands.spawn((
         Name::new("Warrior"),
         Unit,
         Warrior,
-        UnitPosition::default(),
+        UnitPosition::new(position),
         UnitSpeed(250.),
+        UnitState::Idle,
         AseSpriteAnimation {
             aseprite: assets.load("Warrior_Blue.aseprite"),
             animation: Animation::tag("Idle").with_repeat(AnimationRepeat::Loop),
         },
     ));
-}
-
-fn warr_animation(
-    mut warrior_q: Query<(&mut AseSpriteAnimation, &mut Sprite, &UnitPosition), With<Warrior>>,
-) {
-    for (mut animation, mut sprite, position) in &mut warrior_q {
-        if let Some(desired) = position.desired {
-            if desired.x < position.current.x {
-                sprite.flip_x = true;
-            } else if desired.x > position.current.x {
-                sprite.flip_x = false;
-            }
-        }
-
-        if position.desired.is_some() {
-            animation.animation.tag = Some("Run".into());
-        } else {
-            animation.animation.tag = Some("Idle".into());
-        }
-    }
 }

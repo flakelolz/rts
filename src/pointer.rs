@@ -10,7 +10,6 @@ impl Plugin for MousePlugin {
             .register_type::<MousePosition>()
             .init_resource::<Selected>()
             .register_type::<Selected>();
-            // .add_plugins(ResourceInspectorPlugin::<Selected>::default());
     }
 }
 

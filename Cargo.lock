@@ -3737,6 +3737,7 @@ dependencies = [
  "bevy",
  "bevy-inspector-egui",
  "bevy_aseprite_ultra",
+ "fastrand",
 ]
 
 [[package]]

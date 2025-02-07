@@ -22,6 +22,7 @@ pub mod prelude {
         bevy_inspector, egui,
     };
     pub use std::time::Duration;
+    pub use fastrand::i32;
 }
 
 use crate::prelude::*;
