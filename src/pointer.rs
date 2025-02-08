@@ -81,8 +81,10 @@ fn mouse_select(
     if click.just_pressed(MouseButton::Left) {
         for interaction in &pointers {
             if let Some((entity, _)) = interaction.get_nearest_hit() {
+                // Since left control wasn't being held, clear selected for new single selection
+                selected.clear();
+
                 if !selected.contains(entity) {
-                    selected.clear();
                     selected.push(*entity);
                 }
                 return;
