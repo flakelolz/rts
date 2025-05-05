@@ -108,9 +108,7 @@ fn group_select(
     }
 
     if click.just_released(MouseButton::Left) {
-        let Some(clicked) = mouse.clicked else {
-            return;
-        };
+        let Some(clicked) = mouse.clicked else { return };
 
         let x_min = f32::min(clicked.x, mouse.x);
         let x_max = f32::max(clicked.x, mouse.x);
