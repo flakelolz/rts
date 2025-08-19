@@ -28,6 +28,7 @@ fn spawn_warrior(mut commands: Commands, assets: Res<AssetServer>) {
         Warrior,
         UnitPosition::new(position),
         UnitSpeed(250.),
+        UnitCollider(20.0),
         UnitState::Idle,
         AseSpriteAnimation {
             aseprite: assets.load("Warrior_Blue.aseprite"),

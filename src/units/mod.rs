@@ -9,9 +9,11 @@ impl Plugin for UnitsPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<UnitPosition>()
             .register_type::<UnitSpeed>()
+            .register_type::<UnitCollider>()
             .add_systems(Update, update_unit_transform)
             .add_systems(Update, assign_unit_movement)
             .add_systems(Update, update_unit_movement)
+            .add_systems(Update, handle_collisions)
             .add_plugins(WarriorPlugin);
     }
 }
@@ -64,6 +66,38 @@ impl UnitPosition {
 #[derive(Component, Default, Deref, DerefMut, Reflect, InspectorOptions)]
 #[reflect(Component, InspectorOptions)]
 pub struct UnitSpeed(pub f32);
+
+#[derive(Component, Default, Deref, DerefMut, Reflect, InspectorOptions)]
+#[reflect(Component, InspectorOptions)]
+pub struct UnitCollider(pub f32); // radius
+
+impl UnitCollider {
+    fn collides_with(
+        &self,
+        self_position: &Vec3,
+        other: &UnitCollider,
+        other_position: &Vec3,
+    ) -> bool {
+        self_position.distance(*other_position) < self.0 + other.0
+    }
+}
+
+fn handle_collisions(query: Query<(&UnitCollider, &Transform)>) {
+    for (i, (collider_i, transform_i)) in query.iter().enumerate() {
+        for (j, (collider_j, transform_j)) in query.iter().enumerate() {
+            if i < j
+                && collider_i.collides_with(
+                    &transform_i.translation,
+                    collider_j,
+                    &transform_j.translation,
+                )
+            {
+                // TODO: Collision behavior
+                info!("COLLISION");
+            }
+        }
+    }
+}
 
 fn update_unit_transform(mut query: Query<(&mut Transform, &mut UnitPosition), With<Unit>>) {
     for (mut transform, position) in &mut query {
